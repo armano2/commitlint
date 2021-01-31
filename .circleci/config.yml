@@ -11,14 +11,10 @@ commands:
           command: yarn global add yarn@latest
   install:
     steps:
+      - run: yarn cache dir
       - run:
           name: Install dependencies
-          command: yarn install --ignore-engines --frozen-lockfile --cache-folder ~/.cache/yarn
-  install-win:
-    steps:
-      - run:
-          name: Install windows dependencies
-          command: yarn install --ignore-engines --frozen-lockfile --cache-folder %systemdrive%%homepath%/.cache/yarn
+          command: yarn install --ignore-engines --frozen-lockfile
   audit:
     steps:
       - run:
@@ -52,14 +48,14 @@ commands:
   save-cache:
     steps:
       - save_cache:
-          key: v2.2-{{ arch }}-yarn-lock-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
+          key: v2.3-{{ arch }}-yarn-lock-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
   restore-cache:
     steps:
       - restore_cache:
           keys:
-            - v2.2-{{ arch }}-yarn-lock-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
+            - v2.3-{{ arch }}-yarn-lock-{{ .Environment.CIRCLE_JOB }}-{{ checksum "yarn.lock" }}
   run-all:
     steps:
       - checkout
@@ -73,26 +69,14 @@ commands:
       - deps
       - test
   run-tests:
-    parameters:
-      win:
-        type: boolean
-        default: false
     steps:
       - checkout
       - update-yarn
       - restore-cache
-      - when:
-          condition: << parameters.win >>
-          steps:
-            - install-win
-      - unless:
-          condition: << parameters.win >>
-          steps:
-            - install
+      - install
       - save-cache
       - build
       - test
-
 jobs:
   v10:
     docker:

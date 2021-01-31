@@ -96,8 +96,7 @@ jobs:
   windows-v12:
     executor: win/default
     steps:
-      - run-tests:
-          win: true
+      - run-tests
 
 workflows:
   node:
